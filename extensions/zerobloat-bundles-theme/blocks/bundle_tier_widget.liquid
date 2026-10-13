@@ -1,0 +1,583 @@
+{% comment %}
+  ZeroBloat Bundles - Ultra-Fast Tiered Pricing & Volume Discount Widget
+  Zero external bloat, pure vanilla JS, urgency timer & native Shopify Cart API integration.
+{% endcomment %}
+
+{% if product %}
+  {% assign is_out_of_stock = false %}
+  {% if product.available == false %}
+    {% assign is_out_of_stock = true %}
+  {% endif %}
+
+  {% if block.settings.out_of_stock_behavior == 'hide' and is_out_of_stock and request.design_mode != true %}
+    {% comment %}Widget hidden on live storefront because product is sold out{% endcomment %}
+  {% else %}
+    {% assign visible_tiers = block.settings.visible_tiers | default: 3 %}
+
+    {% assign default_tier1_qty = block.settings.tier1_qty | default: 1 %}
+    {% assign default_tier1_discount = block.settings.tier1_discount | default: 0 %}
+    {% assign default_tier1_label = block.settings.tier1_label | default: "Single Pack" %}
+    {% assign default_tier1_sub = block.settings.tier1_sub | default: "Standard Price" %}
+
+    {% assign default_tier2_qty = block.settings.tier2_qty | default: 2 %}
+    {% assign default_tier2_discount = block.settings.tier2_discount | default: 15 %}
+    {% assign default_tier2_label = block.settings.tier2_label | default: "Double Pack" %}
+    {% assign default_tier2_badge = block.settings.tier2_badge | default: "MOST POPULAR" %}
+
+    {% assign default_tier3_qty = block.settings.tier3_qty | default: 3 %}
+    {% assign default_tier3_discount = block.settings.tier3_discount | default: 25 %}
+    {% assign default_tier3_label = block.settings.tier3_label | default: "Family Pack" %}
+    {% assign default_tier3_badge = block.settings.tier3_badge | default: "BEST VALUE" %}
+
+    {% assign default_tier4_qty = block.settings.tier4_qty | default: 4 %}
+    {% assign default_tier4_discount = block.settings.tier4_discount | default: 30 %}
+    {% assign default_tier4_label = block.settings.tier4_label | default: "4-Pack" %}
+    {% assign default_tier4_badge = block.settings.tier4_badge | default: "SUPER SAVINGS" %}
+
+    {% assign default_tier5_qty = block.settings.tier5_qty | default: 5 %}
+    {% assign default_tier5_discount = block.settings.tier5_discount | default: 35 %}
+    {% assign default_tier5_label = block.settings.tier5_label | default: "5-Pack" %}
+    {% assign default_tier5_badge = block.settings.tier5_badge | default: "MEGA PACK" %}
+
+    {% assign default_tier6_qty = block.settings.tier6_qty | default: 6 %}
+    {% assign default_tier6_discount = block.settings.tier6_discount | default: 40 %}
+    {% assign default_tier6_label = block.settings.tier6_label | default: "6-Pack" %}
+    {% assign default_tier6_badge = block.settings.tier6_badge | default: "WHOLESALE" %}
+
+    {% assign save_prefix = block.settings.save_prefix | default: "Save" %}
+    {% assign save_suffix = block.settings.save_suffix | default: "% OFF" %}
+    {% assign sold_out_text = block.settings.sold_out_text | default: "Sold Out" %}
+    {% assign default_btn_text = block.settings.btn_text | default: "Add Bundle to Cart" %}
+    {% assign base_price = product.selected_or_first_available_variant.price | default: product.price %}
+
+    <div class="zerobloat-bundle-container" 
+         id="zerobloat-bundle-{{ block.id }}" 
+         data-product-id="{{ product.id }}"
+         data-product-available="{{ product.available }}"
+         data-product-price="{{ base_price }}"
+         data-currency-symbol="{{ cart.currency.symbol }}"
+         data-item-prefix="{{ block.settings.item_prefix | default: 'Item' }}"
+         data-btn-text="{{ default_btn_text }}"
+         data-sold-out-text="{{ sold_out_text }}"
+         data-loading-text="{{ block.settings.loading_text | default: 'Adding Bundle...' }}"
+         data-added-text="{{ block.settings.added_text | default: 'Added to Cart!' }}"
+         style="--zb-accent: {{ block.settings.accent_color | default: '#10b981' }}; --zb-bg: {{ block.settings.card_bg | default: '#ffffff' }}; --zb-border: {{ block.settings.card_border | default: '#e2e8f0' }}; --zb-text: {{ block.settings.text_color | default: '#0f172a' }};">
+      
+      {% if block.settings.widget_title != blank %}
+        <div class="zerobloat-header">
+          <span class="zerobloat-title">{{ block.settings.widget_title }}</span>
+          {% if block.settings.widget_subtitle != blank %}
+            <span class="zerobloat-subtitle">{{ block.settings.widget_subtitle }}</span>
+          {% endif %}
+        </div>
+      {% endif %}
+
+      <!-- OPTIONAL COUNTDOWN TIMER (URGENCY / FOMO) -->
+      {% if block.settings.enable_timer %}
+        <div class="zerobloat-timer-wrap"
+             data-timer-type="{{ block.settings.timer_type | default: 'evergreen' }}"
+             data-timer-date="{{ block.settings.timer_date | default: '2026-12-31 23:59' }}"
+             data-timer-minutes="{{ block.settings.timer_minutes | default: 15 }}"
+             data-timer-action="{{ block.settings.timer_expired_action | default: 'hide' }}"
+             data-timer-expired-text="{{ block.settings.timer_expired_text | default: 'Offer Expired' }}">
+          <div class="zerobloat-timer-inner">
+            <div class="zerobloat-timer-label-wrap">
+              <svg class="zerobloat-timer-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+              </svg>
+              <span class="zerobloat-timer-label">{{ block.settings.timer_text | default: "Special offer ends in:" }}</span>
+            </div>
+            <div class="zerobloat-timer-digits">
+              <span class="zerobloat-timer-box zb-timer-days" style="display:none;"><b class="zb-d">00</b>d</span>
+              <span class="zerobloat-timer-sep zb-timer-days-sep" style="display:none;">:</span>
+              <span class="zerobloat-timer-box"><b class="zb-h">00</b>h</span>
+              <span class="zerobloat-timer-sep">:</span>
+              <span class="zerobloat-timer-box"><b class="zb-m">00</b>m</span>
+              <span class="zerobloat-timer-sep">:</span>
+              <span class="zerobloat-timer-box"><b class="zb-s">00</b>s</span>
+            </div>
+          </div>
+        </div>
+      {% endif %}
+
+      <div class="zerobloat-tiers">
+        <!-- TIER 1 -->
+        {% if visible_tiers >= 1 %}
+          <label class="zerobloat-tier-card" data-tier="1" data-qty="{{ default_tier1_qty }}" data-discount="{{ default_tier1_discount }}">
+            <div class="zerobloat-tier-radio">
+              <input type="radio" name="zerobloat_tier_{{ block.id }}" value="1">
+              <span class="zerobloat-radio-mark"></span>
+            </div>
+            <div class="zerobloat-tier-info">
+              <div class="zerobloat-tier-headline">
+                <span class="zerobloat-tier-name">{{ default_tier1_label }}</span>
+                <span class="zerobloat-tier-qty">({{ default_tier1_qty }}x)</span>
+              </div>
+              <div class="zerobloat-tier-sub">{{ default_tier1_sub }}</div>
+            </div>
+            <div class="zerobloat-tier-pricing">
+              <span class="zerobloat-price-total" data-base-total="{{ base_price | times: default_tier1_qty }}">
+                {{ base_price | times: default_tier1_qty | money }}
+              </span>
+            </div>
+          </label>
+        {% endif %}
+
+        <!-- TIER 2 (DEFAULT ACTIVE IF VISIBLE) -->
+        {% if visible_tiers >= 2 %}
+          <label class="zerobloat-tier-card active" data-tier="2" data-qty="{{ default_tier2_qty }}" data-discount="{{ default_tier2_discount }}">
+            {% if default_tier2_badge != blank %}
+              <span class="zerobloat-badge">{{ default_tier2_badge }}</span>
+            {% endif %}
+            <div class="zerobloat-tier-radio">
+              <input type="radio" name="zerobloat_tier_{{ block.id }}" value="2" checked>
+              <span class="zerobloat-radio-mark"></span>
+            </div>
+            <div class="zerobloat-tier-info">
+              <div class="zerobloat-tier-headline">
+                <span class="zerobloat-tier-name">{{ default_tier2_label }}</span>
+                <span class="zerobloat-tier-qty">({{ default_tier2_qty }}x)</span>
+              </div>
+              <div class="zerobloat-tier-sub">{{ save_prefix }} {{ default_tier2_discount }}{{ save_suffix }}</div>
+            </div>
+            <div class="zerobloat-tier-pricing">
+              {% assign t2_original = base_price | times: default_tier2_qty %}
+              {% assign t2_discount_rate = 100 | minus: default_tier2_discount %}
+              {% assign t2_discounted = t2_original | times: t2_discount_rate | divided_by: 100 %}
+              <span class="zerobloat-price-total">{{ t2_discounted | money }}</span>
+              <span class="zerobloat-price-compare">{{ t2_original | money }}</span>
+            </div>
+          </label>
+        {% endif %}
+
+        <!-- TIER 3 -->
+        {% if visible_tiers >= 3 %}
+          <label class="zerobloat-tier-card" data-tier="3" data-qty="{{ default_tier3_qty }}" data-discount="{{ default_tier3_discount }}">
+            {% if default_tier3_badge != blank %}
+              <span class="zerobloat-badge best-value">{{ default_tier3_badge }}</span>
+            {% endif %}
+            <div class="zerobloat-tier-radio">
+              <input type="radio" name="zerobloat_tier_{{ block.id }}" value="3">
+              <span class="zerobloat-radio-mark"></span>
+            </div>
+            <div class="zerobloat-tier-info">
+              <div class="zerobloat-tier-headline">
+                <span class="zerobloat-tier-name">{{ default_tier3_label }}</span>
+                <span class="zerobloat-tier-qty">({{ default_tier3_qty }}x)</span>
+              </div>
+              <div class="zerobloat-tier-sub">{{ save_prefix }} {{ default_tier3_discount }}{{ save_suffix }}</div>
+            </div>
+            <div class="zerobloat-tier-pricing">
+              {% assign t3_original = base_price | times: default_tier3_qty %}
+              {% assign t3_discount_rate = 100 | minus: default_tier3_discount %}
+              {% assign t3_discounted = t3_original | times: t3_discount_rate | divided_by: 100 %}
+              <span class="zerobloat-price-total">{{ t3_discounted | money }}</span>
+              <span class="zerobloat-price-compare">{{ t3_original | money }}</span>
+            </div>
+          </label>
+        {% endif %}
+
+        <!-- TIER 4 -->
+        {% if visible_tiers >= 4 %}
+          <label class="zerobloat-tier-card" data-tier="4" data-qty="{{ default_tier4_qty }}" data-discount="{{ default_tier4_discount }}">
+            {% if default_tier4_badge != blank %}
+              <span class="zerobloat-badge" style="background:#0ea5e9;">{{ default_tier4_badge }}</span>
+            {% endif %}
+            <div class="zerobloat-tier-radio">
+              <input type="radio" name="zerobloat_tier_{{ block.id }}" value="4">
+              <span class="zerobloat-radio-mark"></span>
+            </div>
+            <div class="zerobloat-tier-info">
+              <div class="zerobloat-tier-headline">
+                <span class="zerobloat-tier-name">{{ default_tier4_label }}</span>
+                <span class="zerobloat-tier-qty">({{ default_tier4_qty }}x)</span>
+              </div>
+              <div class="zerobloat-tier-sub">{{ save_prefix }} {{ default_tier4_discount }}{{ save_suffix }}</div>
+            </div>
+            <div class="zerobloat-tier-pricing">
+              {% assign t4_original = base_price | times: default_tier4_qty %}
+              {% assign t4_discount_rate = 100 | minus: default_tier4_discount %}
+              {% assign t4_discounted = t4_original | times: t4_discount_rate | divided_by: 100 %}
+              <span class="zerobloat-price-total">{{ t4_discounted | money }}</span>
+              <span class="zerobloat-price-compare">{{ t4_original | money }}</span>
+            </div>
+          </label>
+        {% endif %}
+
+        <!-- TIER 5 -->
+        {% if visible_tiers >= 5 %}
+          <label class="zerobloat-tier-card" data-tier="5" data-qty="{{ default_tier5_qty }}" data-discount="{{ default_tier5_discount }}">
+            {% if default_tier5_badge != blank %}
+              <span class="zerobloat-badge" style="background:#8b5cf6;">{{ default_tier5_badge }}</span>
+            {% endif %}
+            <div class="zerobloat-tier-radio">
+              <input type="radio" name="zerobloat_tier_{{ block.id }}" value="5">
+              <span class="zerobloat-radio-mark"></span>
+            </div>
+            <div class="zerobloat-tier-info">
+              <div class="zerobloat-tier-headline">
+                <span class="zerobloat-tier-name">{{ default_tier5_label }}</span>
+                <span class="zerobloat-tier-qty">({{ default_tier5_qty }}x)</span>
+              </div>
+              <div class="zerobloat-tier-sub">{{ save_prefix }} {{ default_tier5_discount }}{{ save_suffix }}</div>
+            </div>
+            <div class="zerobloat-tier-pricing">
+              {% assign t5_original = base_price | times: default_tier5_qty %}
+              {% assign t5_discount_rate = 100 | minus: default_tier5_discount %}
+              {% assign t5_discounted = t5_original | times: t5_discount_rate | divided_by: 100 %}
+              <span class="zerobloat-price-total">{{ t5_discounted | money }}</span>
+              <span class="zerobloat-price-compare">{{ t5_original | money }}</span>
+            </div>
+          </label>
+        {% endif %}
+
+        <!-- TIER 6 -->
+        {% if visible_tiers >= 6 %}
+          <label class="zerobloat-tier-card" data-tier="6" data-qty="{{ default_tier6_qty }}" data-discount="{{ default_tier6_discount }}">
+            {% if default_tier6_badge != blank %}
+              <span class="zerobloat-badge" style="background:#f59e0b;">{{ default_tier6_badge }}</span>
+            {% endif %}
+            <div class="zerobloat-tier-radio">
+              <input type="radio" name="zerobloat_tier_{{ block.id }}" value="6">
+              <span class="zerobloat-radio-mark"></span>
+            </div>
+            <div class="zerobloat-tier-info">
+              <div class="zerobloat-tier-headline">
+                <span class="zerobloat-tier-name">{{ default_tier6_label }}</span>
+                <span class="zerobloat-tier-qty">({{ default_tier6_qty }}x)</span>
+              </div>
+              <div class="zerobloat-tier-sub">{{ save_prefix }} {{ default_tier6_discount }}{{ save_suffix }}</div>
+            </div>
+            <div class="zerobloat-tier-pricing">
+              {% assign t6_original = base_price | times: default_tier6_qty %}
+              {% assign t6_discount_rate = 100 | minus: default_tier6_discount %}
+              {% assign t6_discounted = t6_original | times: t6_discount_rate | divided_by: 100 %}
+              <span class="zerobloat-price-total">{{ t6_discounted | money }}</span>
+              <span class="zerobloat-price-compare">{{ t6_original | money }}</span>
+            </div>
+          </label>
+        {% endif %}
+      </div>
+
+      <!-- VARIANT SELECTION (IF APPLICABLE) -->
+      {% if product.has_only_default_variant == false %}
+        <div class="zerobloat-variant-selectors" id="zerobloat-variants-{{ block.id }}">
+          <!-- Rendered dynamically by bundle-widget.js according to active tier qty -->
+        </div>
+      {% endif %}
+
+      <!-- ADD BUNDLE BUTTON -->
+      <button type="button" 
+              class="zerobloat-add-btn{% if is_out_of_stock %} disabled{% endif %}" 
+              id="zerobloat-btn-{{ block.id }}"
+              {% if is_out_of_stock %}disabled="disabled"{% endif %}>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+        <span class="zerobloat-btn-text">
+          {% if is_out_of_stock %}
+            {{ sold_out_text }}
+          {% else %}
+            {{ default_btn_text }}
+          {% endif %}
+        </span>
+      </button>
+    </div>
+
+    <script type="application/json" id="zerobloat-product-json-{{ block.id }}">
+      {{ product | json }}
+    </script>
+
+    {{ 'bundle-widget.css' | asset_url | stylesheet_tag }}
+    <script src="{{ 'bundle-widget.js' | asset_url }}" defer="defer"></script>
+  {% endif %}
+{% endif %}
+
+{% schema %}
+{
+  "name": "ZeroBloat Bundles",
+  "target": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Settings & Tier Count"
+    },
+    {
+      "type": "range",
+      "id": "visible_tiers",
+      "label": "Number of Active Tiers to Show",
+      "min": 1,
+      "max": 4,
+      "step": 1,
+      "default": 3
+    },
+    {
+      "type": "text",
+      "id": "widget_title",
+      "label": "Widget Header Title",
+      "default": "Bundle & Save"
+    },
+    {
+      "type": "text",
+      "id": "widget_subtitle",
+      "label": "Subtitle",
+      "default": "Choose your package below for instant volume discounts"
+    },
+    {
+      "type": "text",
+      "id": "item_prefix",
+      "label": "Item Label (e.g. Item, Peça, Produto)",
+      "default": "Item"
+    },
+    {
+      "type": "text",
+      "id": "save_prefix",
+      "label": "Discount Text Prefix (e.g. Save, Economize)",
+      "default": "Save"
+    },
+    {
+      "type": "text",
+      "id": "save_suffix",
+      "label": "Discount Text Suffix (e.g. % OFF, % de desconto)",
+      "default": "% OFF"
+    },
+    {
+      "type": "select",
+      "id": "out_of_stock_behavior",
+      "label": "When Product is Out of Stock",
+      "options": [
+        {
+          "value": "disable",
+          "label": "Disable button & show 'Sold Out'"
+        },
+        {
+          "value": "hide",
+          "label": "Hide entire widget"
+        }
+      ],
+      "default": "disable"
+    },
+    {
+      "type": "text",
+      "id": "sold_out_text",
+      "label": "Sold Out Text (e.g. Sold Out, Esgotado)",
+      "default": "Sold Out"
+    },
+    {
+      "type": "header",
+      "content": "Tiers Configuration (1 to 4)"
+    },
+    {
+      "type": "number",
+      "id": "tier1_qty",
+      "label": "Tier 1 Quantity",
+      "default": 1
+    },
+    {
+      "type": "number",
+      "id": "tier1_discount",
+      "label": "Tier 1 Discount %",
+      "default": 0
+    },
+    {
+      "type": "text",
+      "id": "tier1_label",
+      "label": "Tier 1 Label",
+      "default": "Buy 1"
+    },
+    {
+      "type": "text",
+      "id": "tier1_sub",
+      "label": "Tier 1 Subtitle",
+      "default": "Standard Price"
+    },
+    {
+      "type": "number",
+      "id": "tier2_qty",
+      "label": "Tier 2 Quantity",
+      "default": 2
+    },
+    {
+      "type": "number",
+      "id": "tier2_discount",
+      "label": "Tier 2 Discount %",
+      "default": 15
+    },
+    {
+      "type": "text",
+      "id": "tier2_label",
+      "label": "Tier 2 Label",
+      "default": "Buy 2"
+    },
+    {
+      "type": "text",
+      "id": "tier2_badge",
+      "label": "Tier 2 Badge",
+      "default": "MOST POPULAR"
+    },
+    {
+      "type": "number",
+      "id": "tier3_qty",
+      "label": "Tier 3 Quantity",
+      "default": 3
+    },
+    {
+      "type": "number",
+      "id": "tier3_discount",
+      "label": "Tier 3 Discount %",
+      "default": 25
+    },
+    {
+      "type": "text",
+      "id": "tier3_label",
+      "label": "Tier 3 Label",
+      "default": "Buy 3"
+    },
+    {
+      "type": "text",
+      "id": "tier3_badge",
+      "label": "Tier 3 Badge",
+      "default": "BEST VALUE"
+    },
+    {
+      "type": "number",
+      "id": "tier4_qty",
+      "label": "Tier 4 Quantity",
+      "default": 4
+    },
+    {
+      "type": "number",
+      "id": "tier4_discount",
+      "label": "Tier 4 Discount %",
+      "default": 30
+    },
+    {
+      "type": "text",
+      "id": "tier4_label",
+      "label": "Tier 4 Label",
+      "default": "Buy 4"
+    },
+    {
+      "type": "text",
+      "id": "tier4_badge",
+      "label": "Tier 4 Badge",
+      "default": "SUPER SAVINGS"
+    },
+    {
+      "type": "header",
+      "content": "Countdown Timer & Urgency"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_timer",
+      "label": "Enable Countdown Timer (Urgency)",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "timer_type",
+      "label": "Timer Mode",
+      "options": [
+        {
+          "value": "evergreen",
+          "label": "Option 2: Evergreen (Visitor Session)"
+        },
+        {
+          "value": "fixed_date",
+          "label": "Option 1: Fixed Campaign End Date"
+        }
+      ],
+      "default": "evergreen"
+    },
+    {
+      "type": "number",
+      "id": "timer_minutes",
+      "label": "Session Duration (Minutes)",
+      "default": 15
+    },
+    {
+      "type": "text",
+      "id": "timer_date",
+      "label": "End Date (YYYY-MM-DD HH:MM)",
+      "default": "2026-12-31 23:59"
+    },
+    {
+      "type": "text",
+      "id": "timer_text",
+      "label": "Timer Label Text",
+      "default": "Special offer ends in:"
+    },
+    {
+      "type": "select",
+      "id": "timer_expired_action",
+      "label": "When Timer Expires",
+      "options": [
+        {
+          "value": "hide",
+          "label": "Hide entire bundle offer"
+        },
+        {
+          "value": "disable",
+          "label": "Disable button & show Expired"
+        },
+        {
+          "value": "restart",
+          "label": "Restart timer (Evergreen loop)"
+        }
+      ],
+      "default": "hide"
+    },
+    {
+      "type": "text",
+      "id": "timer_expired_text",
+      "label": "Expired Offer Text",
+      "default": "Offer Expired"
+    },
+    {
+      "type": "header",
+      "content": "Button & Styling"
+    },
+    {
+      "type": "text",
+      "id": "btn_text",
+      "label": "Button Text",
+      "default": "Add Bundle to Cart"
+    },
+    {
+      "type": "text",
+      "id": "loading_text",
+      "label": "Button Loading Text",
+      "default": "Adding Bundle..."
+    },
+    {
+      "type": "text",
+      "id": "added_text",
+      "label": "Button Success Text",
+      "default": "Added to Cart!"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Accent / Highlight Color",
+      "default": "#10b981"
+    },
+    {
+      "type": "color",
+      "id": "card_bg",
+      "label": "Card Background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "card_border",
+      "label": "Card Border Color",
+      "default": "#e2e8f0"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text Color",
+      "default": "#0f172a"
+    }
+  ]
+}
+{% endschema %}

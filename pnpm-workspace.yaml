@@ -7,3 +7,5 @@ allowBuilds:
   esbuild: true
   prisma: true
   unrs-resolver: true
+minimumReleaseAgeExclude:
+  - '@shopify/cli@4.9.3'

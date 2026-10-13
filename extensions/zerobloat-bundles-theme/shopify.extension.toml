@@ -1,0 +1,7 @@
+api_version = "2024-10"
+
+[[extensions]]
+name = "ZeroBloat Bundles"
+handle = "zerobloat-bundles-theme"
+uid = "f75bd294-6cf5-2ebd-60e5-8e919468ae1669e9761f"
+type = "theme"

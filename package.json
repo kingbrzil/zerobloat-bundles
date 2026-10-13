@@ -1,5 +1,5 @@
 {
-  "name": "app",
+  "name": "zerobloat-bundles",
   "private": true,
   "scripts": {
     "build": "remix vite:build",
@@ -43,6 +43,8 @@
     "@remix-run/eslint-config": "^2.16.1",
     "@remix-run/route-config": "^2.16.1",
     "@shopify/api-codegen-preset": "^1.1.1",
+    "@shopify/app": "^3.58.2",
+    "@shopify/cli": "^4.9.3",
     "@types/eslint": "^9.6.1",
     "@types/node": "^22.2.0",
     "@types/react": "^18.2.31",
@@ -53,11 +55,9 @@
     "typescript": "^5.2.2",
     "vite": "^6.2.2"
   },
-  "workspaces": {
-    "packages": [
-      "extensions/*"
-    ]
-  },
+  "workspaces": [
+    "extensions/*"
+  ],
   "trustedDependencies": [
     "@shopify/plugin-cloudflare"
   ],

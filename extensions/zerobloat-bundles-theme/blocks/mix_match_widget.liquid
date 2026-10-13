@@ -1,0 +1,471 @@
+{% comment %}
+  ZeroBloat Bundles - Mix & Match Cross-Sell [PRO FEATURE]
+  Pure Vanilla JS, under 3.5KB, native Shopify Cart API integration.
+{% endcomment %}
+
+{% if product %}
+  {% assign is_out_of_stock = false %}
+  {% if product.available == false %}
+    {% assign is_out_of_stock = true %}
+  {% endif %}
+
+  {% if block.settings.out_of_stock_behavior == 'hide' and is_out_of_stock and request.design_mode != true %}
+    {% comment %}Widget hidden on live storefront because product is sold out{% endcomment %}
+  {% else %}
+    {% assign discount_2 = block.settings.discount_percent | default: 15 %}
+    {% assign discount_3 = block.settings.discount_percent_3 | default: 20 %}
+    {% assign discount_4 = block.settings.discount_percent_4 | default: 25 %}
+    {% assign discount_5 = block.settings.discount_percent_5 | default: 30 %}
+
+    {% assign complementary_products = block.settings.bundle_products %}
+    {% assign this_item_label = block.settings.this_item_text | default: "This Item" %}
+    {% assign save_word = block.settings.save_label | default: "Save" %}
+    {% assign sold_out_word = block.settings.sold_out_text | default: "Sold Out" %}
+    {% assign btn_label = block.settings.btn_text | default: "Add Bundle to Cart" %}
+    {% assign main_price = product.selected_or_first_available_variant.price | default: product.price %}
+
+    <div class="zerobloat-mm-container"
+         id="zerobloat-mm-{{ block.id }}"
+         data-block-id="{{ block.id }}"
+         data-discount-2="{{ discount_2 }}"
+         data-discount-3="{{ discount_3 }}"
+         data-discount-4="{{ discount_4 }}"
+         data-discount-5="{{ discount_5 }}"
+         data-currency-symbol="{{ cart.currency.symbol }}"
+         data-main-available="{{ product.available }}"
+         data-btn-text="{{ btn_label }}"
+         data-sold-out-text="{{ sold_out_word }}"
+         data-loading-text="{{ block.settings.loading_text | default: 'Adding Bundle...' }}"
+         data-added-text="{{ block.settings.added_text | default: 'Added to Cart!' }}"
+         data-save-prefix="{{ save_word }}"
+         data-this-item-text="{{ this_item_label }}"
+         style="--zb-mm-accent: {{ block.settings.accent_color | default: '#6366f1' }}; --zb-mm-bg: {{ block.settings.card_bg | default: '#ffffff' }}; --zb-mm-border: {{ block.settings.border_color | default: '#e2e8f0' }}; --zb-mm-text: {{ block.settings.text_color | default: '#0f172a' }};">
+
+      <!-- HEADER -->
+      <div class="zerobloat-mm-header">
+        <div class="zerobloat-mm-title-wrap">
+          <h3 class="zerobloat-mm-title">{{ block.settings.widget_title | default: "Frequently Bought Together" }}</h3>
+        </div>
+        {% if block.settings.widget_subtitle != blank %}
+          <div class="zerobloat-mm-subtitle">{{ block.settings.widget_subtitle }}</div>
+        {% endif %}
+      </div>
+
+      <!-- OPTIONAL COUNTDOWN TIMER (URGENCY / FOMO) -->
+      {% if block.settings.enable_timer %}
+        <div class="zerobloat-timer-wrap zerobloat-mm-timer-wrap"
+             data-timer-type="{{ block.settings.timer_type | default: 'evergreen' }}"
+             data-timer-date="{{ block.settings.timer_date | default: '2026-12-31 23:59' }}"
+             data-timer-minutes="{{ block.settings.timer_minutes | default: 15 }}"
+             data-timer-action="{{ block.settings.timer_expired_action | default: 'hide' }}"
+             data-timer-expired-text="{{ block.settings.timer_expired_text | default: 'Offer Expired' }}">
+          <div class="zerobloat-timer-inner">
+            <div class="zerobloat-timer-label-wrap">
+              <svg class="zerobloat-timer-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 16 14"></polyline>
+              </svg>
+              <span class="zerobloat-timer-label">{{ block.settings.timer_text | default: "Special offer ends in:" }}</span>
+            </div>
+            <div class="zerobloat-timer-digits">
+              <span class="zerobloat-timer-box zb-timer-days" style="display:none;"><b class="zb-d">00</b>d</span>
+              <span class="zerobloat-timer-sep zb-timer-days-sep" style="display:none;">:</span>
+              <span class="zerobloat-timer-box"><b class="zb-h">00</b>h</span>
+              <span class="zerobloat-timer-sep">:</span>
+              <span class="zerobloat-timer-box"><b class="zb-m">00</b>m</span>
+              <span class="zerobloat-timer-sep">:</span>
+              <span class="zerobloat-timer-box"><b class="zb-s">00</b>s</span>
+            </div>
+          </div>
+        </div>
+      {% endif %}
+
+      <!-- THUMBNAIL CHAIN ROW (Thumb + Thumb = Discount) -->
+      <div class="zerobloat-mm-visual-row">
+        <!-- Main Product Photo -->
+        <div class="zerobloat-mm-thumb-card active" data-product-id="{{ product.id }}">
+          {% if product.featured_image %}
+            <img src="{{ product.featured_image | image_url: width: 200 }}" 
+                 alt="{{ product.title | escape }}" 
+                 width="200" 
+                 height="200" 
+                 loading="lazy">
+          {% else %}
+            {{ 'product-1' | placeholder_svg_tag }}
+          {% endif %}
+        </div>
+
+        {% if complementary_products != blank and complementary_products.size > 0 %}
+          {% for comp_prod in complementary_products %}
+            <span class="zerobloat-mm-plus">+</span>
+            <div class="zerobloat-mm-thumb-card active" data-product-id="{{ comp_prod.id }}">
+              {% if comp_prod.featured_image %}
+                <img src="{{ comp_prod.featured_image | image_url: width: 200 }}" 
+                     alt="{{ comp_prod.title | escape }}" 
+                     width="200" 
+                     height="200" 
+                     loading="lazy">
+              {% else %}
+                {{ 'product-2' | placeholder_svg_tag }}
+              {% endif %}
+            </div>
+          {% endfor %}
+        {% else %}
+          <!-- Theme Editor guidance when no products are picked yet -->
+          <span class="zerobloat-mm-plus">+</span>
+          <div class="zerobloat-mm-thumb-card active" data-product-id="placeholder-1">
+            {{ 'product-2' | placeholder_svg_tag }}
+          </div>
+        {% endif %}
+
+        <span class="zerobloat-mm-equals">=</span>
+        <div class="zerobloat-mm-badge zerobloat-mm-header-badge" style="font-size:0.8rem;padding:6px 10px;">
+          {{ discount_2 }}% OFF
+        </div>
+      </div>
+
+      <!-- PRODUCTS CHECKLIST -->
+      <div class="zerobloat-mm-list">
+        <!-- MAIN PRODUCT ITEM -->
+        <div class="zerobloat-mm-item{% if product.available %} active{% else %} sold-out{% endif %}">
+          <div class="zerobloat-mm-item-left">
+            <input type="checkbox"
+                   class="zerobloat-mm-checkbox"
+                   id="zb-mm-chk-{{ product.id }}-{{ block.id }}"
+                   data-product-id="{{ product.id }}"
+                   data-available="{{ product.available }}"
+                   data-variant-id="{{ product.selected_or_first_available_variant.id | default: product.variants[0].id }}"
+                   data-price="{{ main_price }}"
+                   {% if product.available %}checked{% else %}disabled{% endif %}>
+            <div class="zerobloat-mm-item-info">
+              <span class="zerobloat-mm-item-title">
+                {{ product.title }}
+                {% unless product.available %}
+                  <span class="zerobloat-mm-soldout-badge">({{ sold_out_word }})</span>
+                {% endunless %}
+              </span>
+              <span class="zerobloat-mm-item-tag">{{ this_item_label }}</span>
+              {% if product.has_only_default_variant == false %}
+                <select class="zerobloat-mm-item-variant">
+                  {% for variant in product.variants %}
+                    {% assign var_img = variant.featured_image | default: product.featured_image %}
+                    <option value="{{ variant.id }}" 
+                            data-price="{{ variant.price }}" 
+                            data-available="{{ variant.available }}"
+                            data-image="{% if var_img %}{{ var_img | image_url: width: 200 }}{% endif %}"
+                            {% if variant == product.selected_or_first_available_variant %}selected{% endif %}>
+                      {{ variant.title }} - {{ variant.price | money }}{% unless variant.available %} ({{ sold_out_word }}){% endunless %}
+                    </option>
+                  {% endfor %}
+                </select>
+              {% endif %}
+            </div>
+          </div>
+          <div class="zerobloat-mm-item-price">
+            {{ main_price | money }}
+          </div>
+        </div>
+
+        <!-- COMPLEMENTARY PRODUCTS -->
+        {% if complementary_products != blank and complementary_products.size > 0 %}
+          {% for comp_prod in complementary_products %}
+            {% assign comp_available = comp_prod.available %}
+            {% assign comp_price = comp_prod.selected_or_first_available_variant.price | default: comp_prod.price %}
+            <div class="zerobloat-mm-item{% if comp_available %} active{% else %} sold-out{% endif %}">
+              <div class="zerobloat-mm-item-left">
+                <input type="checkbox"
+                       class="zerobloat-mm-checkbox"
+                       id="zb-mm-chk-{{ comp_prod.id }}-{{ block.id }}"
+                       data-product-id="{{ comp_prod.id }}"
+                       data-available="{{ comp_available }}"
+                       data-variant-id="{{ comp_prod.selected_or_first_available_variant.id | default: comp_prod.variants[0].id }}"
+                       data-price="{{ comp_price }}"
+                       {% if comp_available %}checked{% else %}disabled{% endif %}>
+                <div class="zerobloat-mm-item-info">
+                  <span class="zerobloat-mm-item-title">
+                    {{ comp_prod.title }}
+                    {% unless comp_available %}
+                      <span class="zerobloat-mm-soldout-badge">({{ sold_out_word }})</span>
+                    {% endunless %}
+                  </span>
+                  {% if comp_prod.has_only_default_variant == false %}
+                    <select class="zerobloat-mm-item-variant">
+                      {% for variant in comp_prod.variants %}
+                        {% assign cvar_img = variant.featured_image | default: comp_prod.featured_image %}
+                        <option value="{{ variant.id }}" 
+                                data-price="{{ variant.price }}" 
+                                data-available="{{ variant.available }}"
+                                data-image="{% if cvar_img %}{{ cvar_img | image_url: width: 200 }}{% endif %}"
+                                {% if variant == comp_prod.selected_or_first_available_variant %}selected{% endif %}>
+                          {{ variant.title }} - {{ variant.price | money }}{% unless variant.available %} ({{ sold_out_word }}){% endunless %}
+                        </option>
+                      {% endfor %}
+                    </select>
+                  {% endif %}
+                </div>
+              </div>
+              <div class="zerobloat-mm-item-price">
+                {{ comp_price | money }}
+              </div>
+            </div>
+          {% endfor %}
+        {% else %}
+          <!-- Placeholder in theme editor preview -->
+          <div class="zerobloat-mm-item active">
+            <div class="zerobloat-mm-item-left">
+              <input type="checkbox" class="zerobloat-mm-checkbox" data-product-id="placeholder-1" data-variant-id="0" data-price="2999" checked>
+              <div class="zerobloat-mm-item-info">
+                <span class="zerobloat-mm-item-title">Complementary Product (Select in block settings)</span>
+                <span class="zerobloat-mm-item-tag">e.g. Pants, Accessories, Conditioner</span>
+              </div>
+            </div>
+            <div class="zerobloat-mm-item-price">
+              {{ 2999 | money }}
+            </div>
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- SUMMARY & BUY ACTION -->
+      <div class="zerobloat-mm-summary">
+        <div class="zerobloat-mm-summary-prices">
+          <span class="zerobloat-mm-total-price">{{ cart.currency.symbol }}0.00</span>
+          <div class="zerobloat-mm-compare-row">
+            <span class="zerobloat-mm-compare-price">{{ cart.currency.symbol }}0.00</span>
+            <span class="zerobloat-mm-savings-badge">{{ save_word }} {{ discount_2 }}%</span>
+          </div>
+        </div>
+        <div>
+          <button type="button" 
+                  class="zerobloat-mm-btn{% if is_out_of_stock %} disabled{% endif %}"
+                  {% if is_out_of_stock %}disabled="disabled"{% endif %}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+            <span class="zerobloat-mm-btn-text">
+              {% if is_out_of_stock %}
+                {{ sold_out_word }}
+              {% else %}
+                {{ btn_label }}
+              {% endif %}
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    {{ 'mix-match.css' | asset_url | stylesheet_tag }}
+    <script src="{{ 'mix-match.js' | asset_url }}" defer="defer"></script>
+  {% endif %}
+{% endif %}
+
+{% schema %}
+{
+  "name": "Mix & Match (PRO)",
+  "target": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "General Texts & Translation"
+    },
+    {
+      "type": "text",
+      "id": "widget_title",
+      "label": "Widget Title",
+      "default": "Frequently Bought Together"
+    },
+    {
+      "type": "text",
+      "id": "widget_subtitle",
+      "label": "Subtitle",
+      "default": "Buy these items together and get an instant bundle discount"
+    },
+    {
+      "type": "text",
+      "id": "this_item_text",
+      "label": "Current Item Badge (e.g. This Item, Este item)",
+      "default": "This Item"
+    },
+    {
+      "type": "text",
+      "id": "save_label",
+      "label": "Save Label (e.g. Save, Economize)",
+      "default": "Save"
+    },
+    {
+      "type": "header",
+      "content": "Inventory & Out of Stock"
+    },
+    {
+      "type": "select",
+      "id": "out_of_stock_behavior",
+      "label": "When Main Product is Out of Stock",
+      "options": [
+        {
+          "value": "disable",
+          "label": "Disable button & show 'Sold Out'"
+        },
+        {
+          "value": "hide",
+          "label": "Hide entire widget"
+        }
+      ],
+      "default": "disable"
+    },
+    {
+      "type": "text",
+      "id": "sold_out_text",
+      "label": "Sold Out Text (e.g. Sold Out, Esgotado)",
+      "default": "Sold Out"
+    },
+    {
+      "type": "header",
+      "content": "Bundle Products & Tiers"
+    },
+    {
+      "type": "product_list",
+      "id": "bundle_products",
+      "label": "Complementary Bundle Products (Pick up to 20)",
+      "limit": 20
+    },
+    {
+      "type": "number",
+      "id": "discount_percent",
+      "label": "Discount for 2 Items (%)",
+      "default": 15
+    },
+    {
+      "type": "number",
+      "id": "discount_percent_3",
+      "label": "Discount for 3 Items (%)",
+      "default": 20
+    },
+    {
+      "type": "number",
+      "id": "discount_percent_4",
+      "label": "Discount for 4 Items (%)",
+      "default": 25
+    },
+    {
+      "type": "number",
+      "id": "discount_percent_5",
+      "label": "Discount for 5+ Items (%)",
+      "default": 30
+    },
+    {
+      "type": "header",
+      "content": "Countdown Timer & Urgency"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_timer",
+      "label": "Enable Countdown Timer (Urgency)",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "timer_type",
+      "label": "Timer Mode",
+      "options": [
+        {
+          "value": "evergreen",
+          "label": "Option 2: Evergreen (Visitor Session)"
+        },
+        {
+          "value": "fixed_date",
+          "label": "Option 1: Fixed Campaign End Date"
+        }
+      ],
+      "default": "evergreen"
+    },
+    {
+      "type": "number",
+      "id": "timer_minutes",
+      "label": "Session Duration (Minutes)",
+      "default": 15
+    },
+    {
+      "type": "text",
+      "id": "timer_date",
+      "label": "End Date (YYYY-MM-DD HH:MM)",
+      "default": "2026-12-31 23:59"
+    },
+    {
+      "type": "text",
+      "id": "timer_text",
+      "label": "Timer Label Text",
+      "default": "Special offer ends in:"
+    },
+    {
+      "type": "select",
+      "id": "timer_expired_action",
+      "label": "When Timer Expires",
+      "options": [
+        {
+          "value": "hide",
+          "label": "Hide entire bundle offer"
+        },
+        {
+          "value": "disable",
+          "label": "Disable button & show Expired"
+        },
+        {
+          "value": "restart",
+          "label": "Restart timer (Evergreen loop)"
+        }
+      ],
+      "default": "hide"
+    },
+    {
+      "type": "text",
+      "id": "timer_expired_text",
+      "label": "Expired Offer Text",
+      "default": "Offer Expired"
+    },
+    {
+      "type": "header",
+      "content": "Button & Styling"
+    },
+    {
+      "type": "text",
+      "id": "btn_text",
+      "label": "Button Text",
+      "default": "Add Bundle to Cart"
+    },
+    {
+      "type": "text",
+      "id": "loading_text",
+      "label": "Button Loading Text",
+      "default": "Adding Bundle..."
+    },
+    {
+      "type": "text",
+      "id": "added_text",
+      "label": "Button Success Text",
+      "default": "Added to Cart!"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Accent Color",
+      "default": "#6366f1"
+    },
+    {
+      "type": "color",
+      "id": "card_bg",
+      "label": "Card Background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "Border Color",
+      "default": "#e2e8f0"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text Color",
+      "default": "#0f172a"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,325 @@
+/* ZeroBloat Bundles - Core Widget Styling (Pure CSS < 3KB) */
+
+.zerobloat-bundle-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  margin: 10px 0;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+
+.zerobloat-header {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.zerobloat-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--zb-text);
+  letter-spacing: -0.01em;
+}
+
+.zerobloat-subtitle {
+  font-size: 0.8rem;
+  color: #64748b;
+}
+
+.zerobloat-tiers {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.zerobloat-tier-card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background-color: var(--zb-bg);
+  border: 1.5px solid var(--zb-border);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+  box-sizing: border-box;
+}
+
+.zerobloat-tier-card:hover {
+  border-color: #cbd5e1;
+  transform: translateY(-1px);
+}
+
+.zerobloat-tier-card.active {
+  border-color: var(--zb-accent);
+  background-color: #f8fafc;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
+}
+
+.zerobloat-badge {
+  position: absolute;
+  top: -10px;
+  right: 14px;
+  background: var(--zb-accent);
+  color: #ffffff;
+  font-size: 0.68rem;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 9999px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+}
+
+.zerobloat-badge.best-value {
+  background: #6366f1;
+}
+
+.zerobloat-tier-radio {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.zerobloat-tier-radio input {
+  display: none;
+}
+
+.zerobloat-radio-mark {
+  width: 18px;
+  height: 18px;
+  border: 2px solid #94a3b8;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.zerobloat-tier-card.active .zerobloat-radio-mark {
+  border-color: var(--zb-accent);
+  background-color: var(--zb-accent);
+  box-shadow: inset 0 0 0 3px #ffffff;
+}
+
+.zerobloat-tier-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.zerobloat-tier-headline {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.zerobloat-tier-name {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--zb-text);
+}
+
+.zerobloat-tier-qty {
+  font-size: 0.8rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.zerobloat-tier-sub {
+  font-size: 0.8rem;
+  color: var(--zb-accent);
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+.zerobloat-tier-pricing {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.zerobloat-price-total {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--zb-text);
+}
+
+.zerobloat-price-compare {
+  font-size: 0.8rem;
+  color: #94a3b8;
+  text-decoration: line-through;
+  margin-top: 1px;
+}
+
+/* Variant Selectors Block */
+.zerobloat-variant-selectors {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  background: #f1f5f9;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+}
+
+.zerobloat-item-select-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.zerobloat-item-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #475569;
+}
+
+.zerobloat-select-group {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.zerobloat-select {
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  font-size: 0.85rem;
+  color: #1e293b;
+  outline: none;
+  cursor: pointer;
+  max-width: 130px;
+}
+
+/* Add to Cart Button */
+.zerobloat-add-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 14px 20px;
+  background-color: var(--zb-accent);
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 4px;
+}
+
+.zerobloat-add-btn:hover {
+  filter: brightness(0.92);
+  transform: translateY(-1px);
+}
+
+.zerobloat-add-btn:active {
+  transform: translateY(0);
+}
+
+.zerobloat-add-btn.loading {
+  opacity: 0.75;
+  pointer-events: none;
+}
+
+.zerobloat-add-btn:disabled,
+.zerobloat-add-btn.disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  pointer-events: none;
+  background-color: #94a3b8 !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* Urgency Countdown Timer */
+.zerobloat-timer-wrap {
+  margin-bottom: 12px;
+  background: #fef2f2;
+  border: 1px solid #fee2e2;
+  border-radius: 8px;
+  padding: 8px 12px;
+  display: block;
+  box-sizing: border-box;
+}
+
+.zerobloat-timer-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.zerobloat-timer-label-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.zerobloat-timer-icon {
+  color: #ef4444;
+  flex-shrink: 0;
+  animation: zb-timer-pulse 2s infinite ease-in-out;
+}
+
+@keyframes zb-timer-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(0.92); }
+}
+
+.zerobloat-timer-label {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #991b1b;
+}
+
+.zerobloat-timer-digits {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  font-family: inherit;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+.zerobloat-timer-box {
+  background: #ffffff;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+  padding: 2px 5px;
+  border-radius: 4px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  min-width: 28px;
+  text-align: center;
+}
+
+.zerobloat-timer-box b {
+  font-weight: 800;
+}
+
+.zerobloat-timer-sep {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #ef4444;
+  margin: 0 1px;
+}
+
+.zerobloat-timer-expired-msg {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #dc2626;
+  width: 100%;
+  text-align: center;
+}

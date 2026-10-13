@@ -1,0 +1,28 @@
+query RunInput {
+  cart {
+    lines {
+      id
+      quantity
+      attribute(key: "_bundle_discount") {
+        value
+      }
+      tierAttribute: attribute(key: "_bundle_tier") {
+        value
+      }
+      typeAttribute: attribute(key: "_bundle_type") {
+        value
+      }
+      merchandise {
+        __typename
+        ... on ProductVariant {
+          id
+          title
+          product {
+            id
+            title
+          }
+        }
+      }
+    }
+  }
+}

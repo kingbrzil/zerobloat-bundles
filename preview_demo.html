@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZeroBloat Bundles - Live Storefront Preview</title>
+  <style>
+    :root {
+      --zb-accent: #10b981;
+      --zb-bg: #ffffff;
+      --zb-border: #e2e8f0;
+      --zb-text: #0f172a;
+    }
+    
+    body {
+      margin: 0;
+      padding: 40px 20px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: #f8fafc;
+      color: #334155;
+      display: flex;
+      justify-content: center;
+    }
+
+    .mockup-wrapper {
+      max-width: 480px;
+      width: 100%;
+      background: #ffffff;
+      border-radius: 20px;
+      box-shadow: 0 20px 40px -15px rgba(0,0,0,0.07), 0 0 0 1px rgba(0,0,0,0.05);
+      padding: 24px;
+      box-sizing: border-box;
+    }
+
+    .demo-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #ecfdf5;
+      color: #059669;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 9999px;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .product-title {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: #0f172a;
+      margin: 0 0 8px 0;
+    }
+
+    .product-price-row {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .current-price {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: #0f172a;
+    }
+
+    .original-price {
+      font-size: 1.1rem;
+      color: #94a3b8;
+      text-decoration: line-through;
+    }
+
+    /* ZeroBloat Widget Styles */
+    .zerobloat-bundle-container {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      width: 100%;
+      margin: 16px 0;
+      box-sizing: border-box;
+    }
+
+    .zerobloat-header {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .zerobloat-title {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: var(--zb-text);
+      letter-spacing: -0.01em;
+    }
+
+    .zerobloat-subtitle {
+      font-size: 0.8rem;
+      color: #64748b;
+    }
+
+    .zerobloat-tiers {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      width: 100%;
+    }
+
+    .zerobloat-tier-card {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+      background-color: var(--zb-bg);
+      border: 2px solid var(--zb-border);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      user-select: none;
+      box-sizing: border-box;
+    }
+
+    .zerobloat-tier-card:hover {
+      border-color: #cbd5e1;
+      transform: translateY(-1px);
+    }
+
+    .zerobloat-tier-card.active {
+      border-color: var(--zb-accent);
+      background-color: #f0fdf4;
+      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.08);
+    }
+
+    .zerobloat-badge {
+      position: absolute;
+      top: -10px;
+      right: 14px;
+      background: var(--zb-accent);
+      color: #ffffff;
+      font-size: 0.68rem;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: 9999px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+    }
+
+    .zerobloat-badge.best-value {
+      background: #6366f1;
+    }
+
+    .zerobloat-tier-radio {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .zerobloat-tier-radio input {
+      display: none;
+    }
+
+    .zerobloat-radio-mark {
+      width: 18px;
+      height: 18px;
+      border: 2px solid #94a3b8;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+
+    .zerobloat-tier-card.active .zerobloat-radio-mark {
+      border-color: var(--zb-accent);
+      background-color: var(--zb-accent);
+      box-shadow: inset 0 0 0 3px #ffffff;
+    }
+
+    .zerobloat-tier-info {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+
+    .zerobloat-tier-headline {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .zerobloat-tier-name {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--zb-text);
+    }
+
+    .zerobloat-tier-qty {
+      font-size: 0.8rem;
+      color: #64748b;
+      font-weight: 500;
+    }
+
+    .zerobloat-tier-sub {
+      font-size: 0.8rem;
+      color: var(--zb-accent);
+      font-weight: 700;
+      margin-top: 2px;
+    }
+
+    .zerobloat-tier-pricing {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+    }
+
+    .zerobloat-price-total {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: var(--zb-text);
+    }
+
+    .zerobloat-price-compare {
+      font-size: 0.8rem;
+      color: #94a3b8;
+      text-decoration: line-through;
+      margin-top: 1px;
+    }
+
+    .zerobloat-variant-selectors {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 12px;
+      background: #f8fafc;
+      border-radius: 10px;
+      border: 1px solid #e2e8f0;
+      margin-top: 4px;
+    }
+
+    .zerobloat-item-select-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .zerobloat-item-label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #475569;
+    }
+
+    .zerobloat-select {
+      padding: 6px 12px;
+      border-radius: 6px;
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      font-size: 0.85rem;
+      color: #1e293b;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .zerobloat-add-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 14px 20px;
+      background-color: var(--zb-accent);
+      color: #ffffff;
+      border: none;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      margin-top: 10px;
+      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.25);
+    }
+
+    .zerobloat-add-btn:hover {
+      filter: brightness(0.92);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(16, 185, 129, 0.35);
+    }
+
+    .cart-feedback {
+      margin-top: 14px;
+      padding: 12px;
+      background: #ecfdf5;
+      border: 1px solid #a7f3d0;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      color: #065f46;
+      display: none;
+      text-align: center;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="mockup-wrapper">
+    <div class="demo-badge">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle; margin-right:4px;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      ZeroBloat • Vanilla JS
+    </div>
+    <h1 class="product-title">Premium Comfort Hoodie</h1>
+    <div class="product-price-row">
+      <span class="current-price" id="header-price">$49.99</span>
+      <span class="original-price" id="header-compare"></span>
+    </div>
+
+    <!-- WIDGET START -->
+    <div class="zerobloat-bundle-container" id="zerobloat-bundle-demo">
+      <div class="zerobloat-header">
+        <span class="zerobloat-title">Bundle & Save</span>
+        <span class="zerobloat-subtitle">Select your package below for instant volume discounts</span>
+      </div>
+
+      <div class="zerobloat-tiers">
+        <!-- TIER 1 -->
+        <label class="zerobloat-tier-card" data-tier="1" data-qty="1" data-discount="0">
+          <div class="zerobloat-tier-radio">
+            <input type="radio" name="demo_tier" value="1">
+            <span class="zerobloat-radio-mark"></span>
+          </div>
+          <div class="zerobloat-tier-info">
+            <div class="zerobloat-tier-headline">
+              <span class="zerobloat-tier-name">Single Pack</span>
+              <span class="zerobloat-tier-qty">(1x)</span>
+            </div>
+            <div class="zerobloat-tier-sub" style="color: #64748b; font-weight: normal;">Standard Price</div>
+          </div>
+          <div class="zerobloat-tier-pricing">
+            <span class="zerobloat-price-total">$49.99</span>
+          </div>
+        </label>
+
+        <!-- TIER 2 (DEFAULT ACTIVE / MOST POPULAR) -->
+        <label class="zerobloat-tier-card active" data-tier="2" data-qty="2" data-discount="15">
+          <span class="zerobloat-badge">MOST POPULAR</span>
+          <div class="zerobloat-tier-radio">
+            <input type="radio" name="demo_tier" value="2" checked>
+            <span class="zerobloat-radio-mark"></span>
+          </div>
+          <div class="zerobloat-tier-info">
+            <div class="zerobloat-tier-headline">
+              <span class="zerobloat-tier-name">Double Pack</span>
+              <span class="zerobloat-tier-qty">(2x)</span>
+            </div>
+            <div class="zerobloat-tier-sub">Save 15% OFF</div>
+          </div>
+          <div class="zerobloat-tier-pricing">
+            <span class="zerobloat-price-total">$84.98</span>
+            <span class="zerobloat-price-compare">$99.98</span>
+          </div>
+        </label>
+
+        <!-- TIER 3 (BEST VALUE) -->
+        <label class="zerobloat-tier-card" data-tier="3" data-qty="3" data-discount="25">
+          <span class="zerobloat-badge best-value">BEST VALUE</span>
+          <div class="zerobloat-tier-radio">
+            <input type="radio" name="demo_tier" value="3">
+            <span class="zerobloat-radio-mark"></span>
+          </div>
+          <div class="zerobloat-tier-info">
+            <div class="zerobloat-tier-headline">
+              <span class="zerobloat-tier-name">Family Pack</span>
+              <span class="zerobloat-tier-qty">(3x)</span>
+            </div>
+            <div class="zerobloat-tier-sub">Save 25% OFF</div>
+          </div>
+          <div class="zerobloat-tier-pricing">
+            <span class="zerobloat-price-total">$112.47</span>
+            <span class="zerobloat-price-compare">$149.97</span>
+          </div>
+        </label>
+      </div>
+
+      <!-- VARIANT SELECTORS (Size / Color) -->
+      <div class="zerobloat-variant-selectors" id="demo-variants-box">
+        <!-- Injected via JavaScript -->
+      </div>
+
+      <button type="button" class="zerobloat-add-btn" id="demo-add-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+        <span>Add Bundle to Cart</span>
+      </button>
+
+      <div class="cart-feedback" id="demo-feedback">
+        Bundle added to cart with 15% discount applied.
+      </div>
+    </div>
+    <!-- WIDGET END -->
+
+  </div>
+
+  <script>
+    const tierCards = document.querySelectorAll('.zerobloat-tier-card');
+    const variantsBox = document.getElementById('demo-variants-box');
+    const addBtn = document.getElementById('demo-add-btn');
+    const feedback = document.getElementById('demo-feedback');
+    const headerPrice = document.getElementById('header-price');
+    const headerCompare = document.getElementById('header-compare');
+
+    const sizes = ['Small (S)', 'Medium (M)', 'Large (L)', 'XL'];
+    const colors = ['Black', 'Heather Grey', 'Navy Blue'];
+
+    function renderVariants(qty) {
+      variantsBox.innerHTML = '';
+      for (let i = 1; i <= qty; i++) {
+        const row = document.createElement('div');
+        row.className = 'zerobloat-item-select-row';
+        row.innerHTML = `
+          <span class="zerobloat-item-label">Hoodie #${i}:</span>
+          <div style="display: flex; gap: 6px;">
+            <select class="zerobloat-select">
+              ${sizes.map(s => `<option>${s}</option>`).join('')}
+            </select>
+            <select class="zerobloat-select">
+              ${colors.map(c => `<option>${c}</option>`).join('')}
+            </select>
+          </div>
+        `;
+        variantsBox.appendChild(row);
+      }
+    }
+
+    tierCards.forEach(card => {
+      card.addEventListener('click', function() {
+        tierCards.forEach(c => c.classList.remove('active'));
+        this.classList.add('active');
+
+        const radio = this.querySelector('input[type="radio"]');
+        if (radio) radio.checked = true;
+
+        const qty = parseInt(this.dataset.qty, 10);
+        const discount = parseInt(this.dataset.discount, 10);
+        renderVariants(qty);
+
+        const totalElem = this.querySelector('.zerobloat-price-total').textContent;
+        const compareElem = this.querySelector('.zerobloat-price-compare');
+        headerPrice.textContent = totalElem;
+        headerCompare.textContent = compareElem ? compareElem.textContent : '';
+        feedback.style.display = 'none';
+      });
+    });
+
+    renderVariants(2); // default tier 2
+
+    addBtn.addEventListener('click', () => {
+      const activeCard = document.querySelector('.zerobloat-tier-card.active');
+      const discount = activeCard.dataset.discount;
+      feedback.textContent = `✓ Added ${activeCard.dataset.qty}x items with ${discount}% discount to Shopify Cart!`;
+      feedback.style.display = 'block';
+    });
+  </script>
+</body>
+</html>

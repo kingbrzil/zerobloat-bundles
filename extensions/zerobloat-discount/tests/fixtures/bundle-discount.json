@@ -1,0 +1,77 @@
+{
+  "payload": {
+    "export": "run",
+    "target": "purchase.product-discount.run",
+    "input": {
+      "cart": {
+        "lines": [
+          {
+            "id": "gid://shopify/CartLine/0",
+            "quantity": 1,
+            "attribute": {
+              "value": "15%"
+            },
+            "tierAttribute": {
+              "value": "2"
+            },
+            "typeAttribute": null,
+            "merchandise": {
+              "__typename": "ProductVariant",
+              "id": "gid://shopify/ProductVariant/123",
+              "title": "Variant 1",
+              "product": {
+                "id": "gid://shopify/Product/999",
+                "title": "Gift Card"
+              }
+            }
+          },
+          {
+            "id": "gid://shopify/CartLine/1",
+            "quantity": 1,
+            "attribute": {
+              "value": "15%"
+            },
+            "tierAttribute": {
+              "value": "2"
+            },
+            "typeAttribute": null,
+            "merchandise": {
+              "__typename": "ProductVariant",
+              "id": "gid://shopify/ProductVariant/124",
+              "title": "Variant 2",
+              "product": {
+                "id": "gid://shopify/Product/999",
+                "title": "Gift Card"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "output": {
+      "discountApplicationStrategy": "ALL",
+      "discounts": [
+        {
+          "targets": [
+            {
+              "cartLine": {
+                "id": "gid://shopify/CartLine/0"
+              }
+            },
+            {
+              "cartLine": {
+                "id": "gid://shopify/CartLine/1"
+              }
+            }
+          ],
+          "value": {
+            "percentage": {
+              "value": "15"
+            }
+          },
+          "message": "ZeroBloat Bundle (15% OFF)"
+        }
+      ]
+    }
+  }
+}
