@@ -2,7 +2,7 @@
 
 name = "ZeroBloat Bundles"
 client_id = "7175679a836c5fee86762627203e00cc"
-application_url = "https://safer-rabbit-kings-being.trycloudflare.com"
+application_url = "https://zerobloat-bundles.onrender.com"
 embedded = true
 
 [access_scopes]
@@ -18,7 +18,7 @@ customer_deletion_url = "/webhooks/compliance/customers_redact"
 shop_deletion_url = "/webhooks/compliance/shop_redact"
 
 [auth]
-redirect_urls = [ "https://safer-rabbit-kings-being.trycloudflare.com/api/auth" ]
+redirect_urls = [ "https://zerobloat-bundles.onrender.com/api/auth" ]
 
 [build]
 automatically_update_urls_on_dev = true
