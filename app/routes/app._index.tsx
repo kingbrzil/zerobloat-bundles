@@ -115,14 +115,20 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   const intent = formData.get("intent") as string;
 
   if (intent === "upgrade_pro") {
+    const apiKey = process.env.SHOPIFY_API_KEY || "7175679a836c5fee86762627203e00cc";
+    const shopHandle = session.shop.replace(".myshopify.com", "");
     try {
       return await billing.request({
         plan: MONTHLY_PLAN,
         isTest: true,
-        returnUrl: `https://${session.shop}/admin/apps/${process.env.SHOPIFY_API_KEY}/app`,
+        returnUrl: `https://admin.shopify.com/store/${shopHandle}/apps/${apiKey}/app`,
       });
     } catch (err: any) {
-      return json({ success: false, error: err.message });
+      if (err instanceof Response) {
+        throw err;
+      }
+      console.error("[ZeroBloat] Billing request error:", err);
+      return json({ success: false, error: err.message || "Failed to process billing request" });
     }
   }
 
